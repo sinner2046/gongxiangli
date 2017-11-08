@@ -22,11 +22,6 @@ define('BIND_MODULE','Admin');
  */
 define ( 'APP_PATH', './Application/' );
 
-if(!is_file(APP_PATH . 'User/Conf/config.php')){
-	header('Location: ./install.php');
-	exit;
-}
-
 /**
  * 缓存目录设置
  * 此目录必须可写，建议移动到非WEB目录
