@@ -18,7 +18,7 @@ require_cache(UC_CLIENT_PATH . '/Common/common.php');
 
 /**
  * UC API调用控制器层
- * 调用方法 A('Uc/User', 'Api')->login($username, $password, $type);
+ * 调用方法 A('Uc/Member', 'Api')->login($username, $password, $type);
  */
 abstract class Api{
 

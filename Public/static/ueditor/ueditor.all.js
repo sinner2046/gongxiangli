@@ -6710,7 +6710,7 @@ UE.plugins['autosubmit'] = function(){
 ///commandsDialog  dialogs\image
 /**
  * Created by .
- * User: zhanyi
+ * Member: zhanyi
  * for image
  */
 
@@ -9109,7 +9109,7 @@ UE.plugins['anchor'] = function (){
 ///commandsTitle  字数统计
 /**
  * Created by JetBrains WebStorm.
- * User: taoqili
+ * Member: taoqili
  * Date: 11-9-7
  * Time: 下午8:18
  * To change this template use File | Settings | File Templates.
@@ -11776,7 +11776,7 @@ UE.plugins['pasteplain'] = function(){
     };
 };/**
  * Created with JetBrains WebStorm.
- * User: taoqili
+ * Member: taoqili
  * Date: 13-1-18
  * Time: 上午11:09
  * To change this template use File | Settings | File Templates.
@@ -12927,7 +12927,7 @@ UE.plugins['pasteplain'] = function(){
     }
 })();/**
  * Created with JetBrains PhpStorm.
- * User: taoqili
+ * Member: taoqili
  * Date: 13-2-20
  * Time: 下午6:25
  * To change this template use File | Settings | File Templates.
@@ -13825,7 +13825,7 @@ UE.plugins['pasteplain'] = function(){
     }
 })();/**
  * Created with JetBrains PhpStorm.
- * User: taoqili
+ * Member: taoqili
  * Date: 12-10-12
  * Time: 上午10:05
  * To change this template use File | Settings | File Templates.

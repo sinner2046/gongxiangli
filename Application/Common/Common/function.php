@@ -654,8 +654,8 @@ if(!function_exists('array_column')){
 
 /**
  * 调用系统的API接口方法（静态方法）
- * api('User/getName','id=5'); 调用公共模块的User接口的getName方法
- * api('Admin/User/getName','id=5');  调用Admin模块的User接口
+ * api('Member/getName','id=5'); 调用公共模块的User接口的getName方法
+ * api('Admin/Member/getName','id=5');  调用Admin模块的User接口
  * @param  string  $name 格式 [模块名]/接口名/方法名
  * @param  array|string  $vars 参数
  */

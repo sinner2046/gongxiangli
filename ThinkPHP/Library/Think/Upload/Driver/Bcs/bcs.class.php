@@ -685,7 +685,7 @@ class BaiduBCS {
 			if (isset ( $opt [self::IMPORT_BCS_PRE_FILTER] ) && function_exists ( $opt [self::IMPORT_BCS_PRE_FILTER] )) {
 				$bolRes = $opt [self::IMPORT_BCS_PRE_FILTER] ( $bucket, $object, $file, $tmp_opt );
 				if ($bolRes !== true) {
-					$this->log ( "User pre_filter_function return un-true. Skip id[$num/$objectCount]object[$object]file[$file].", $opt );
+					$this->log ( "Member pre_filter_function return un-true. Skip id[$num/$objectCount]object[$object]file[$file].", $opt );
 					//$result ['skipped'] [] = "id[$num/$objectCount]object[$object]file[$file]";
 					$result ['skipped'] ++;
 					$num ++;
