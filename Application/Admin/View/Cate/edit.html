@@ -1,0 +1,52 @@
+<extend name="Public/base"/>
+
+<block name="body">
+    <script type="text/javascript" src="__STATIC__/uploadify/jquery.uploadify.min.js"></script>
+    <div class="main-title">
+        <h2>{:isset($info['id'])?'编辑':'新增'}行业职业信息</h2>
+    </div>
+
+    <form action="{:U()}" method="post" class="form-horizontal">
+        <div class="form-item">
+            <label class="item-label">上级<span class="check-tips"></span></label>
+            <div class="controls">
+                <input type="text" class="text input-large" disabled="disabled" value="{$category['name']|default='无'}"/>
+            </div>
+        </div>
+        <div class="form-item">
+            <label class="item-label">名称<span class="check-tips">（名称不能为空）</span></label>
+            <div class="controls">
+                <input type="text" name="name" class="text input-large" value="{$info.name|default=''}">
+            </div>
+        </div>
+        <div class="form-item">
+            <label class="item-label">排序<span class="check-tips">（仅对当前层级有效）</span></label>
+            <div class="controls">
+                <input type="text" name="sort" class="text input-small" value="{$info.sort|default=0}">
+            </div>
+        </div>
+        <div class="form-item">
+            <label class="item-label">
+                状态<span class="check-tips"></span>
+            </label>
+            <div class="controls">
+                <label class="inline radio"><input type="radio" name="status" value="0">禁用</label>
+                <label class="inline radio"><input type="radio" name="status" value="1" checked>启用</label>
+            </div>
+        </div>
+        <div class="form-item">
+            <input type="hidden" name="id" value="{$info.id|default=''}">
+            <input type="hidden" name="pid" value="{:isset($category['id'])?$category['id']:$info['pid']}">
+            <button class="btn submit-btn ajax-post" id="submit" type="submit" target-form="form-horizontal">确 定</button>
+            <button class="btn btn-return" onclick="javascript:history.back(-1);return false;">返 回</button>
+        </div>
+    </form>
+
+</block>
+
+
+<block name="script">
+    <script tyep="text/javascript">
+        highlight_subnav("{:U('Cate/index')}");
+    </script>
+</block>
