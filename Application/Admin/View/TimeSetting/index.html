@@ -1,0 +1,46 @@
+<extend name="Public/base" />
+
+<block name="body">
+    <div class="main-title">
+        <h2>时间规则设置</h2>
+    </div>
+
+
+    <div class="data-table table-striped">
+        <table class="">
+            <thead>
+            <tr>
+                <th class="">ID</th>
+                <th class="">规则</th>
+                <th class="">增加/减少</th>
+                <th class="">数值</th>
+                <th class="">操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <notempty name="list">
+                <volist name="list" id="vo">
+                    <tr>
+                        <td>{$vo.id} </td>
+                        <td>{$vo.act}</td>
+                        <td>
+                            <eq name="vo.type" value="1">增加</eq>
+                            <eq name="vo.type" value="-1">减少</eq>
+                        </td>
+                        <td>{$vo.qty} S</td>
+                        <td>
+                            <a href="{:U('edit?id='.$vo['id'])}">编辑</a>
+                        </td>
+                    </tr>
+                </volist>
+                <else/>
+                <td colspan="9" class="text-center"> aOh! 暂时还没有内容! </td>
+            </notempty>
+            </tbody>
+        </table>
+    </div>
+
+
+
+
+</block>

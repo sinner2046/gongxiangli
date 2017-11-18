@@ -146,4 +146,43 @@ class PublicController extends Controller{
         $this->ajaxSuccess($list);
     }
 
+    //登陆
+    public function login(){
+        $account = I('account');
+        $password = I('password');
+        if(empty($account)){
+            $this->ajaxError('手机号/邮箱 不能为空');
+        }
+        if(empty($password)){
+            $this->ajaxError('密码不能为空');
+        }
+
+        $where['status'] = array('gt', 0);
+
+        if(checkMobile($account)){
+            $where['mobile'] = $account;
+        }elseif(filter_var($account, FILTER_VALIDATE_EMAIL)){
+            $where['eamil'] = $account;
+        }else{
+            $this->ajaxError('手机号/邮箱 验证失败');
+        }
+
+        $info = M("User")->field('uid, nickname, headimg, login_count')->where($where)->find();
+        if(!is_array($info)){
+            $this->ajaxError('用户不存在或被禁用');
+        }
+        if(!D('Admin/User')->verifyPassword($info['id'], $password)){
+            $this->ajaxError('用户密码错误');
+        }
+
+        $where = [];
+        $where['uid'] = $info['uid'];
+        $data['login_time'] = NOW_TIME;
+        $data['login_count'] = $info['login_count'] + 1;
+        M('User')->where($where)->save($data);
+
+        unset($info['login_count']);
+        $this->ajaxSuccess($info,'登陆成功');
+    }
+
 }

@@ -82,3 +82,39 @@ function sendEmail($email, $type, $code){
 
     return $mail->Send() ? true : false;
 }
+
+
+//账户时间变动
+function timesChange($uid, $amount, $type, $info, $act, $act_id){
+    $where['uid'] = $uid;
+    $times = M('User')->where($where)->getField('times');
+    if($type > 0){
+        $user['times'] = $times + $amount;
+    }else{
+        $user['times'] = $times - $amount;
+    }
+
+    $times_change = M('User')->where($where)->save($user);
+    if(!$times_change){
+        return false;
+    }
+
+    $log = array(
+        'uid' => $uid,
+        'type' => $type,
+        'info' => $info,
+        'amount' => $amount,
+        'after' => $user['times'],
+        'act' => $act,
+        'act_id' => $act_id,
+        'create_time' => NOW_TIME
+    );
+    $log_id = M('TimesLog')->add($log);
+
+    if(!$log_id){
+        $user['times'] = $times;
+        M('User')->where($where)->save($user);
+        return false;
+    }
+    return true;
+}

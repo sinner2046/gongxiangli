@@ -1,0 +1,77 @@
+<extend name="Public/base" />
+
+<block name="body">
+    <script type="text/javascript" src="__STATIC__/uploadify/jquery.uploadify.min.js"></script>
+    <div class="main-title">
+        <h2>{:isset($info['id'])?'编辑':'新增'} 图片</h2>
+    </div>
+
+    <form action="{:U()}" method="post" class="form-horizontal">
+        <div class="form-item">
+            <label class="item-label">图片名称<span class="check-tips">（名称不能为空）</span></label>
+            <div class="controls">
+                <input type="text" name="name" class="text input-large" value="{$info.name|default=''}">
+            </div>
+        </div>
+        <div class="form-item">
+            <label class="item-label">图 片<span class="check-tips"></span></label>
+            <div class="controls">
+                <input type="file" id="upload_picture">
+                <input type="hidden" name="picture_id" id="picture_id" value="{$info.picture_id}"/>
+                <div class="upload-img-box">
+                    <notempty name="info['picture_id']">
+                        <img src="{$info.picture_id|get_cover='path'}"/>
+                </div>
+            </div>
+        </div>
+        <div class="form-item">
+            <input type="hidden" name="id" value="{$info.id|default=''}">
+            <button class="btn submit-btn ajax-post" id="submit" type="submit" target-form="form-horizontal">确 定</button>
+            <button class="btn btn-return" onclick="javascript:history.back(-1);return false;">返 回</button>
+        </div>
+    </form>
+
+
+    <script type="text/javascript">
+        //上传图片
+        /* 初始化上传插件 */
+        $("#upload_picture").uploadify({
+            "height"          : 30,
+            "swf"             : "__STATIC__/uploadify/uploadify.swf",
+            "fileObjName"     : "download",
+            "buttonText"      : "上传图片",
+            "uploader"        : "{:U('File/uploadPicture',array('session_id'=>session_id()))}",
+            "width"           : 120,
+            'removeTimeout'	  : 1,
+            'fileTypeExts'	  : '*.jpg; *.png; *.gif;',
+            "onUploadSuccess" : uploadPicture,
+            'onFallback' : function() {
+                alert('未检测到兼容版本的Flash.');
+            }
+        });
+        function uploadPicture(file, data){
+            var data = $.parseJSON(data);
+            var src = '';
+            if(data.status){
+                $("#picture_id").val(data.id);
+                src = data.url || '__ROOT__' + data.path;
+                $("#picture_id").parent().find('.upload-img-box').html(
+                    '<img src="' + src + '"/>'
+                );
+            } else {
+                updateAlert(data.info);
+                setTimeout(function(){
+                    $('#top-alert').find('button').click();
+                    $(that).removeClass('disabled').prop('disabled',false);
+                },1500);
+            }
+        }
+
+    </script>
+</block>
+
+<block name="script">
+    <script tyep="text/javascript">
+        highlight_subnav("{:U('Img/index')}");
+    </script>
+</block>

@@ -1,0 +1,47 @@
+<extend name="Public/base"/>
+
+<block name="body">
+    <div class="main-title">
+        <h2>编辑时间规则设置</h2>
+    </div>
+
+    <form action="{:U()}" method="post" class="form-horizontal">
+        <div class="form-item">
+            <label class="item-label">规则名称<span class="check-tips"></span></label>
+            <div class="controls">
+                <input type="text" class="text input-large" name="name" disabled value="{$info['act']}"/>
+            </div>
+        </div>
+        <div class="form-item">
+            <label class="item-label">
+                规则<span class="check-tips"></span>
+            </label>
+            <div class="controls">
+                <label class="inline radio"><input type="radio" name="type" value="1" <eq name="info.type" value="1">checked</eq>> 增加</label>
+                <label class="inline radio"><input type="radio" name="type" value="-1" <eq name="info.type" value="-1">checked</eq>>减少</label>
+            </div>
+        </div>
+        <div class="form-item">
+            <label class="item-label">数值<span class="check-tips"></span></label>
+            <div class="controls">
+                <input type="number" name="qty" class="text input-small" value="{$info.qty}"> S
+            </div>
+        </div>
+        <div class="form-item">
+            <input type="hidden" name="id" value="{$info.id}">
+            <button class="btn submit-btn ajax-post" id="submit" type="submit" target-form="form-horizontal">确 定</button>
+            <button class="btn btn-return" onclick="javascript:history.back(-1);return false;">返 回</button>
+        </div>
+    </form>
+
+
+
+
+</block>
+
+
+<block name="script">
+    <script tyep="text/javascript">
+        highlight_subnav("{:U('TimeSetting/index')}");
+    </script>
+</block>
