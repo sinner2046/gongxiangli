@@ -45,6 +45,11 @@ class BaseController extends Controller{
         }
         $first_size = ($page - 1) * $page_size;
 
+        $this->data['total_page'] = $total_page;
         return M($model)->field($field)->where($where)->limit($first_size, $page_size )->order($order)->select();
+    }
+
+    public function _empty(){
+        $this->ajaxError('非法操作');
     }
 }

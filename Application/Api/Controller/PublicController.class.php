@@ -57,6 +57,7 @@ class PublicController extends Controller{
                     $this->ajaxError('此用户尚未注册');
                 }
             }
+            $res = sendSms($account, $code);
         }
         if($mode == '2'){
             if(!filter_var($account, FILTER_VALIDATE_EMAIL)) {
@@ -110,6 +111,7 @@ class PublicController extends Controller{
 
         $where['account'] = $account;
         $where['mode'] = $mode;
+        $where['type'] = 1;
         $code_info = M('Code')->where($where)->order('create_time DESC')->find();
         if(!$code_info){
             $this->ajaxError('请先发送验证码');
@@ -119,18 +121,18 @@ class PublicController extends Controller{
         }
 
         if($mode == '1'){
-            $data['mobile'] = I('mobile');
+            $data['mobile'] = $account;
         }
         if($mode == '2'){
-            $data['email'] = I('email');
+
+            $data['email'] = $account;
         }
         $data['password'] = I('password');
-
 
         $user = D('Admin/User');
         $uid = $user->register($data);
         if($uid){
-            $this->ajaxSuccess($uid);
+            $this->ajaxSuccess($uid, '注册成功');
         }
         $this->ajaxError($user->getError());
     }
@@ -141,7 +143,7 @@ class PublicController extends Controller{
         $map  = array('status' => array('gt', 0));
         $list = M('Cate')->field('id,name,pid')->where($map)->order('sort, create_time')->select();
 
-        $list = list_to_tree($list, $pk = 'id', $pid = 'pid', $child = '_', 0);
+        $list = list_to_tree($list, $pk = 'id', $pid = 'pid', $child = 'child', 0);
 
         $this->ajaxSuccess($list);
     }
@@ -184,5 +186,7 @@ class PublicController extends Controller{
         unset($info['login_count']);
         $this->ajaxSuccess($info,'登陆成功');
     }
+
+
 
 }

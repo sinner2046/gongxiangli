@@ -43,8 +43,11 @@ class ImgController extends AdminController{
         if(!empty($id)){
             $info = M('Img')->find($id);
             $this->assign('info', $info);
+            $this->meta_title = '编辑图库图片';
+        }else{
+            $this->meta_title = '新增图库图片';
         }
-        $this->meta_title = '新增图库图片';
+
         $this->display();
     }
 }

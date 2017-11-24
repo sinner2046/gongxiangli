@@ -83,6 +83,45 @@ function sendEmail($email, $type, $code){
     return $mail->Send() ? true : false;
 }
 
+//发送手机验证码
+function sendSms($mobile, $code){
+    $appid = 1400050830;
+    $appkey = "cfc62f6ca4f0d750fb28e544cf76efe0";
+    $random = mt_rand(100000, 999999);
+    $time = NOW_TIME;
+    $url = "https://yun.tim.qq.com/v5/tlssmssvr/sendsms?sdkappid={$appid}&random={$random}";
+    $data = array(
+        'tel' => array(
+            'nationcode' => '86',
+            'mobile' => $mobile
+        ),
+        'tpl_id' => 59411,
+        'params' => array($code),
+        'sig' => hash('sha256', "appkey={$appkey}&random={$random}&time={$time}&mobile={$mobile}"),
+        'time' => $time
+    );
+
+    $res = sendCurlPost($url, json_encode($data));
+    if($res->result != 0){
+        return false;
+    }
+    return true;
+}
+
+function sendCurlPost($url, $data) {
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_HEADER, 0);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_POST, 1);
+    curl_setopt($curl, CURLOPT_POSTFIELDS,  $data);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+    $result = curl_exec($curl);
+
+    curl_close($curl);
+    return json_decode($result);
+}
 
 //账户时间变动
 function timesChange($uid, $amount, $type, $info, $act, $act_id){
@@ -117,4 +156,35 @@ function timesChange($uid, $amount, $type, $info, $act, $act_id){
         return false;
     }
     return true;
+}
+
+//获取链接用户id
+function getLink($uid){
+    $where['uid'] = $uid;
+    $uids = M('Friend')->field('follow_uid')->where($where)->select();
+    if(!$uids){
+        return false;
+    }
+
+    foreach ($uids as $k=>$v){
+        if($k == 0){
+            $uids_str = $v['follow_uid'];
+        }else{
+            $uids_str .= ','.$v['follow_uid'];
+        }
+    }
+    return $uids_str;
+}
+
+//获取用户信息
+function getUserInfo($uid){
+    $where['uid'] = $uid;
+    $info = M('User')->field('nickname, headimg, zhiye')->where($where)->find();
+
+    if($info['zhiye']){
+        $info['zhiye'] = getTagName($info['zhiye']);
+    }else{
+        $info['zhiye'] = '';
+    }
+    return $info;
 }

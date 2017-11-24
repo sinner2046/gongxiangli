@@ -1,9 +1,8 @@
 <extend name="Public/base" />
 
 <block name="body">
-
     <div class="main-title">
-        <h2>目标图库管理</h2>
+        <h2>面对面地址管理</h2>
     </div>
     <div class="cf">
         <div class="fl">
@@ -16,8 +15,7 @@
             <thead>
             <tr>
                 <th class="">ID</th>
-                <th class="">图片名</th>
-                <th class="">图片</th>
+                <th class="">地址</th>
                 <th class="">操作</th>
             </tr>
             </thead>
@@ -26,15 +24,14 @@
                 <volist name="list" id="vo">
                     <tr>
                         <td>{$vo.id} </td>
-                        <td>{$vo.name} </td>
-                        <td><img height="100px" src="{$vo.picture_id|get_cover='path'}"></td>
+                        <td>{$vo.address} </td>
                         <td>
                             <a href="{:U('edit?id='.$vo['id'])}">编辑</a>
                         </td>
                     </tr>
                 </volist>
                 <else/>
-                <td colspan="4" class="text-center"> aOh! 暂时还没有内容! </td>
+                <td colspan="3" class="text-center"> aOh! 暂时还没有内容! </td>
             </notempty>
             </tbody>
         </table>

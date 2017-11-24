@@ -23,13 +23,13 @@ class UserController extends BaseController{
             $this->ajaxError($upload->getError());
 
         }else{// 上传成功 获取上传文件信息
-            if($info['file']['savename']){
+            if($info['headimg']['savename']){
 
                 $users = M('User');
                 $where['uid'] = $this->uid;
                 $headimg = $users->where($where)->getField('headimg');
 
-                $data['headimg'] = substr($config['rootPath'], 1).$info['file']['savepath'].$info['file']['savename'];
+                $data['headimg'] = substr($config['rootPath'], 1).$info['headimg']['savepath'].$info['headimg']['savename'];
                 $id = $users->where($where)->save($data);
                 if($id){
                     if($headimg && $headimg != '/Uploads/headimg.jpg'){

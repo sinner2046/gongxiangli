@@ -48,6 +48,16 @@ class ShareController extends BaseController{
             $this->ajaxError('请选择可见性');
         }
 
+        //检测账户时间余额
+        $set = M('TimeSetting')->field('type, qty')->find($type);
+        if($set['type'] < 0){
+            $where['uid'] = $this->uid;
+            $times = M('User')->where($where)->getField('times');
+            if($times < $set['qty']){
+                $this->ajaxError('账户时间余额不足');
+            }
+        }
+
         /* 图片上传相关配置 */
         $config = array(
             'maxSize'  => 2*1024*1024, //上传的文件大小限制 (0-不做限制)
@@ -69,7 +79,7 @@ class ShareController extends BaseController{
         if($info['file']['savename']) {
             $img = substr($config['rootPath'], 1) . $info['file']['savepath'] . $info['file']['savename'];
         }else{
-            $this->ajaxError('图像像上传失败，请稍后再试');
+            $this->ajaxError('图像上传失败，请稍后再试');
         }
 
         if($type == 1){
@@ -101,8 +111,6 @@ class ShareController extends BaseController{
             $this->ajaxError('发布失败，请稍后再试');
         }
 
-        $set = M('TimeSetting')->find($type);
-
         if(!timesChange($this->uid, $set['qty'], $set['type'], '发布内容', 'add_share', $id)){
             M('Share')->delete($id);
             @unlink(substr($img, 1));
@@ -111,68 +119,37 @@ class ShareController extends BaseController{
         $this->ajaxSuccess('','发布成功');
     }
 
-    //检测share_id是否存在
-    private $share_id;
-    private function checkShareId(){
-        $this->share_id = I('share_id', 0, 'int');
-        if($this->share_id < 1){
-            $this->ajaxError('请选择正确的内容');
-        }
-        $where['id'] = $this->share_id;
-        $where['visible'] = array('gt', 0);
-        if(!M('Share')->where($where)->count()){
-            $this->ajaxError('此内容不存在或被隐藏');
-        }
-    }
-
-
-    //删除/设为隐私，公开 内容
-    public function setShare(){
-        $visible = I('visible');
-        $this->share_id = I('share_id', 0, 'int');
-
-        if(!in_array($visible, array('0', '1', '-1'))){
-            $this->ajaxError('参数错误');
-        }
-        if($this->share_id < 1){
-            $this->ajaxError('请选择正确的内容');
-        }
-
-        $where['id'] = $this->share_id;
+    //获取列表
+    public function getShareList($page = 1){
         $where['uid'] = $this->uid;
-        $where['visible'] = array('gt', -1);
-        $share = M('Share')->where($where)->find();
-        if(!$share){
-            $this->ajaxError('此内容不存在或被删除');
+        $hangye = M('User')->where($where)->getField('hangye');
+        $hangye1 = M('User')->where($where)->getField('hangye1');
+        if($hangye1){
+            $hangye = $hangye.','.$hangye1;
         }
 
-        $data['visible'] = $visible;
-        unset($where['visible']);
-        $set_id = M('Share')->where($where)->save($data);
-        if(!$set_id){
-            $this->ajaxError('操作失败，请稍后再试');
+        $uids = getLink($this->uid);
+
+        $where = [];
+        $where['hangye'] = array('in', $hangye);
+        $where['uid'] = array('in', $uids);
+        $where['_logic'] = 'or';
+        $map['_complex'] = $where;
+        $map['visible']  = array('gt',0);
+
+        $field = 'id, uid, type, img, title, comment, liked, follow, create_time';
+        $order = 'create_time DESC';
+        $data = $this->pageData($page, 'Share', $map, $field, $order);
+
+        foreach ($data as $k=>$v){
+            $info = getUserInfo($v['uid']);
+            $data[$k]['nickname'] = $info['nickname'];
+            $data[$k]['headimg'] = $info['headimg'];
+            $data[$k]['zhiye'] = $info['zhiye'];
         }
 
-        if($visible == '-1'){
-            $where = [];
-            $where['uid'] = $this->uid;
-            $where['act'] = 'add_share';
-            $where['act_id'] = $this->share_id;
-            $log = M('TimesLog')->where($where)->find();
-            if($log['type'] == 1){
-                $type = -1;
-            }else{
-                $type = 1;
-            }
-            if(!timesChange($this->uid, $log['amount'], $type, '删除内容', 'del_share', $this->share_id)){
-                $data['visible'] = $share['visible'];
-                $where = [];
-                $where['id'] = $this->share_id;
-                $where['uid'] = $this->uid;
-                M('Share')->where($where)->save($data);
-                $this->ajaxError('系统错误，请稍后再试');
-            }
-        }
-        $this->ajaxSuccess('', '操作成功');
+        $this->ajaxSuccess($data);
     }
+
+
 }
