@@ -1,0 +1,59 @@
+<extend name="Public/base" />
+
+<block name="body">
+	<!-- 标题栏 -->
+	<div class="main-title">
+		<h2>内容列表</h2>
+	</div>
+
+    <!-- 数据列表 -->
+    <div class="data-table table-striped">
+	<table class="">
+    <thead>
+        <tr>
+		<th class="">ID</th>
+		<th class="">封面图</th>
+		<th class="">标题</th>
+		<th class="">类型</th>
+		<th class="">发布人昵称</th>
+		<th class="">发布人头像</th>
+		<th class="">发布时间</th>
+		<th class="">可见性</th>
+		<th class="">操作</th>
+		</tr>
+    </thead>
+    <tbody>
+		<notempty name="_list">
+		<volist name="_list" id="vo">
+		<tr>
+			<td>{$vo.id} </td>
+			<td><img src="__ROOT__{$vo.img}" width="30px"></td>
+			<td>{$vo.title} </td>
+			<td>
+				<eq name="vo.type" value="1">作品</eq>
+				<eq name="vo.type" value="2">灵感</eq>
+				<eq name="vo.type" value="3">目标</eq>
+				<eq name="vo.type" value="4">成就</eq>
+			</td>
+			<td>{$vo.nickname}</td>
+			<td><img src="__ROOT__{$vo.headimg}" width="30px"></td>
+			<td>{$vo.create_time|time_format}</td>
+			<td>
+				<eq name="vo.visible" value="1">公开</eq>
+				<eq name="vo.visible" value="0">隐私</eq>
+				<eq name="vo.visible" value="-1">删除</eq>
+			</td>
+			<td><a href="{:U('del?id='.$vo['uid'])}" class="confirm ajax-get">删除</a></td>
+		</tr>
+		</volist>
+		<else/>
+		<td colspan="9" class="text-center"> aOh! 暂时还没有内容! </td>
+		</notempty>
+	</tbody>
+    </table>
+	</div>
+    <div class="page">
+        {$_page}
+    </div>
+</block>
+

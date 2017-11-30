@@ -92,7 +92,7 @@ class CateController extends AdminController{
 //        }
 
         //删除该分类信息
-        $res = M('GoodsCate')->delete($cate_id);
+        $res = M('Cate')->delete($cate_id);
         if($res !== false){
             $this->success('删除成功！');
         }else{

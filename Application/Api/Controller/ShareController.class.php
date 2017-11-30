@@ -25,6 +25,7 @@ class ShareController extends BaseController{
     public function addShare(){
         $type = I('type', 0, 'int');
         $title = I('title');
+        $img = I('img');
         $content = I('content');
         $hangye = I('hangye', 0, 'int');
         $visible = I('visible', 1, 'int');
@@ -34,6 +35,9 @@ class ShareController extends BaseController{
         }
         if(strLength($title) < 1 || strLength($title) > 20){
             $this->ajaxError('标题在1-20 个字符之间');
+        }
+        if(empty($img)){
+            $this->ajaxError('请先上传图片');
         }
         if(strLength($content) < 1 || strLength($content) > 200){
             $this->ajaxError('正文内容在1-200 个字符之间');
@@ -47,6 +51,22 @@ class ShareController extends BaseController{
         if(!in_array($visible, array(0, 1))){
             $this->ajaxError('请选择可见性');
         }
+        if($type == 3 || $type == 4){
+            $finish_date = I('finish_date');
+            if(!checkDateFormat($finish_date)){
+                $this->ajaxError('请选择正确的完成日期');
+            }
+        }
+        if($type == 1){
+            $file_type = I('file_type');
+            $url = I('url');
+            if(!in_array($file_type, array('image', 'audio', 'video'))){
+                $this->ajaxError('请选择作品类型');
+            }
+            if(empty($url)){
+                $this->ajaxError('请先上传作品内容');
+            }
+        }
 
         //检测账户时间余额
         $set = M('TimeSetting')->field('type, qty')->find($type);
@@ -56,43 +76,6 @@ class ShareController extends BaseController{
             if($times < $set['qty']){
                 $this->ajaxError('账户时间余额不足');
             }
-        }
-
-        /* 图片上传相关配置 */
-        $config = array(
-            'maxSize'  => 2*1024*1024, //上传的文件大小限制 (0-不做限制)
-            'exts'     => 'jpg,gif,png,jpeg', //允许上传的文件后缀
-            'autoSub'  => true, //自动子目录保存文件
-            'subName'  => array('date', 'Y-m-d'), //子目录创建方式，[0]-函数名，[1]-参数，多个参数使用数组
-            'rootPath' => './Uploads/Share/', //保存根路径
-            'savePath' => '', //保存路径
-            'saveName' => array('uniqid', ''), //上传文件命名规则，[0]-函数名，[1]-参数，多个参数使用数组
-            'saveExt'  => '', //文件保存后缀，空则使用原后缀
-            'replace'  => false, //存在同名是否覆盖
-        );
-        $upload = new \Think\Upload($config);
-        $info   =   $upload->upload();
-
-        if(!$info) {// 上传错误提示错误信息
-            $this->ajaxError($upload->getError());
-        }
-        if($info['file']['savename']) {
-            $img = substr($config['rootPath'], 1) . $info['file']['savepath'] . $info['file']['savename'];
-        }else{
-            $this->ajaxError('图像上传失败，请稍后再试');
-        }
-
-        if($type == 1){
-
-        }
-        if($type == 2){
-
-        }
-        if($type == 3){
-
-        }
-        if($type == 4){
-
         }
 
         $data = array(
@@ -105,10 +88,39 @@ class ShareController extends BaseController{
             'visible' => $visible,
             'create_time' => NOW_TIME
         );
+        if($type == 3){
+            $data['finish_date'] = $finish_date;
+            $data['is_finished'] = 0;
+        }
+        if($type == 4){
+            $data['finish_date'] = $finish_date;
+            $data['is_finished'] = 1;
+        }
         $id = M('Share')->add($data);
 
         if(!$id){
             $this->ajaxError('发布失败，请稍后再试');
+        }
+        if($type == 1){
+            $data['share_id'] = $id;
+            $data['type'] = $file_type;
+            if($file_type == 'image'){
+                foreach ($url as $v){
+                    $data['url'] = $v;
+                    $res = M('ShareFile')->add($data);
+                    if(!$res){
+                        M('Share')->delete($id);
+                        $this->ajaxError('发布失败，请稍后再试');
+                    }
+                }
+            }else{
+                $data['url'] = $url;
+                $res = M('ShareFile')->add($data);
+                if(!$res){
+                    M('Share')->delete($id);
+                    $this->ajaxError('发布失败，请稍后再试');
+                }
+            }
         }
 
         if(!timesChange($this->uid, $set['qty'], $set['type'], '发布内容', 'add_share', $id)){
@@ -131,13 +143,19 @@ class ShareController extends BaseController{
         $uids = getLink($this->uid);
 
         $where = [];
-        $where['hangye'] = array('in', $hangye);
-        $where['uid'] = array('in', $uids);
-        $where['_logic'] = 'or';
-        $map['_complex'] = $where;
+        if($hangye){
+            $where['hangye'] = array('in', $hangye);
+        }
+        if($uids){
+            $where['uid'] = array('in', $uids);
+        }
+        if($hangye || $uids){
+            $where['_logic'] = 'or';
+            $map['_complex'] = $where;
+        }
         $map['visible']  = array('gt',0);
 
-        $field = 'id, uid, type, img, title, comment, liked, follow, create_time';
+        $field = 'id, uid, type, img, title, content, comment, liked, follow, finish_date, is_finished, create_time';
         $order = 'create_time DESC';
         $data = $this->pageData($page, 'Share', $map, $field, $order);
 

@@ -1,0 +1,53 @@
+<extend name="Public/base" />
+
+<block name="body">
+	<!-- 标题栏 -->
+	<div class="main-title">
+		<h2>面对面纠纷列表</h2>
+	</div>
+
+    <!-- 数据列表 -->
+    <div class="data-table table-striped">
+	<table class="">
+    <thead>
+        <tr>
+			<th class="">ID</th>
+			<th class="">主题</th>
+			<th class="">见面时间</th>
+			<th class="">见面地点</th>
+			<th class="">邀请人</th>
+			<th class="">被邀请人</th>
+			<th class="">发起时间</th>
+			<th class="">状态</th>
+			<th class="">操作</th>
+		</tr>
+    </thead>
+    <tbody>
+		<notempty name="_list">
+		<volist name="_list" id="vo">
+		<tr>
+			<td>{$vo.id} </td>
+			<td>{$vo.theme}</td>
+			<td>{$vo.datetime|time_format} </td>
+			<td>{$vo.address}</td>
+			<td>{$vo.inviter_nickname}</td>
+			<td>{$vo.invitee_nickname}</td>
+			<td>{$vo.create_time|time_format}</td>
+			<td>
+				<eq name="vo.status" value="1">已处理</eq>
+				<eq name="vo.status" value="0">未处理</eq>
+			</td>
+			<td><a href="{:U('info?id='.$vo['uid'])}" class="confirm ajax-get">详情</a></td>
+		</tr>
+		</volist>
+		<else/>
+		<td colspan="9" class="text-center"> aOh! 暂时还没有内容! </td>
+		</notempty>
+	</tbody>
+    </table>
+	</div>
+    <div class="page">
+        {$_page}
+    </div>
+</block>
+

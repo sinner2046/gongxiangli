@@ -29,7 +29,7 @@ class IndexController extends BaseController{
         $where['type'] = 4;
         $data['chengjiu'] = $share->where($where)->count();
 
-        $data['facetoface'] = M('Facetoface')->where("uid={$uid} OR to_uid={$uid}")->count();
+        $data['facetoface_num'] = M('Facetoface')->where("uid={$uid} OR to_uid={$uid}")->count();
 
         $facetoface_comment = M('FacetofaceComment');
         $where = [];
@@ -160,6 +160,11 @@ class IndexController extends BaseController{
     }
 
      private function secToTime($times){
+         $result = array(
+             'hour' => 0,
+             'minute' => 0,
+             'sec' => 0
+         );
         if ($times>0) {
             $hour = floor($times/3600);
             $minute = floor(($times-3600 * $hour)/60);
@@ -171,5 +176,38 @@ class IndexController extends BaseController{
             );
         }
         return $result;
+    }
+
+    //我的时间轴
+    public function myShareList($page = 1){
+        $where['uid'] = $this->uid;
+        $where['visible']  = array('egt',0);
+
+        $field = 'id, uid, type, img, title, comment, liked, follow, finish_date, is_finished, create_time';
+        $order = 'create_time DESC';
+        $data = $this->pageData($page, 'Share', $where, $field, $order);
+        $this->ajaxSuccess($data);
+    }
+
+    //他人时间轴
+    public function otherShareList($page = 1){
+        $other_uid = I('other_uid', 0, 'int');
+
+        if ($other_uid < 1) {
+            $this->ajaxError('请先选择用户');
+        }
+        $where['uid'] = $other_uid;
+        $where['status'] = array('gt', 0);
+        if (!M('User')->where($where)->count()) {
+            $this->ajaxError('此用户不存在或被禁用');
+        }
+
+        $where['uid'] = $other_uid;
+        $where['visible']  = array('gt',0);
+
+        $field = 'id, uid, type, img, title, comment, liked, follow, finish_date, is_finished, create_time';
+        $order = 'create_time DESC';
+        $data = $this->pageData($page, 'Share', $where, $field, $order);
+        $this->ajaxSuccess($data);
     }
 }

@@ -152,7 +152,7 @@ class FaceToFaceController extends BaseController{
         $id = I('id', 0, 'int');
         $inviter = I('inviter', 0, 'int');
         $invitee = I('invitee', 0, 'int');
-        $content = I('content', 0, 'int');
+        $content = I('content');
         $goutong = I('goutong', 0, 'int');
         $zhuanye = I('zhuanye', 0, 'int');
 
@@ -174,7 +174,7 @@ class FaceToFaceController extends BaseController{
 
         $where['id'] = $id;
         $where['_string'] = "uid = {$this->uid} OR to_uid = {$this->uid}";
-        $info = M('Facetoface')->field('uid, to_uid')->where($where)->find();
+        $info = M('Facetoface')->field('uid, to_uid, inviter, invitee')->where($where)->find();
         if(!$info){
             $this->ajaxError('此邀请不存在');
         }
@@ -197,10 +197,16 @@ class FaceToFaceController extends BaseController{
             'create_time' => NOW_TIME
         );
         if($info['uid'] == $this->uid){
+            if($info['inviter'] == 1){
+                $this->ajaxError('您已经评价此邀请');
+            }
             $data['to_uid'] = $info['to_uid'];
             $set_data['inviter'] = 1;
         }
         if($info['to_uid'] == $this->uid){
+            if($info['invitee'] == 1){
+                $this->ajaxError('您已经评价此邀请');
+            }
             $data['to_uid'] = $info['uid'];
             $set_data['invitee'] = 1;
         }
@@ -210,13 +216,83 @@ class FaceToFaceController extends BaseController{
             $this->ajaxError('评价失败，请稍后再试');
         }
 
+        //判断对方是否评价
+        $where = [];
+        $where['facetoface_id'] = $id;
+        $where['to_uid'] = $this->uid;
+        $comment = M('FacetofaceComment')->field('inviter, invitee')->where($where)->find();
+        if($comment){
+            if($comment['inviter'] == $inviter && $comment['invitee'] == $invitee){
+                if(!$this->changeTime($id, $this->uid, $info['uid'], $info['to_uid'], $inviter, $invitee)){
+                    M('FacetofaceComment')->delete($add_id);
+                    $this->ajaxError('系统繁忙，请稍后再试');
+                }
+            }else{
+                $data = array(
+                    'facetoface_id' => $id,
+                    'inviter' => 0,
+                    'invitee' => 0,
+                    'status' => 0,
+                    'create_time' => NOW_TIME
+                );
+                $dis_id = M('FacetofaceDispute')->add($data);
+                if(!$dis_id){
+                    M('FacetofaceComment')->delete($add_id);
+                    $this->ajaxError('系统繁忙，请稍后再试');
+                }
+            }
+        }
+
         $where = [];
         $where['id'] = $id;
         if(!M('Facetoface')->where($where)->save($set_data)){
             M('FacetofaceComment')->delete($add_id);
+            if($dis_id){
+                M('FacetofaceDispute')->delete($dis_id);
+            }
             $this->ajaxError('系统错误，请稍后再试');
         }
 
         $this->ajaxSuccess('', '评价成功');
+    }
+
+    //评价一致 时间变动
+    private function changeTime($id, $send_uid, $to_uid, $inviter, $invitee){
+        $where['uid'] = $send_uid;
+        $where['act'] = 'add_facetoface';
+        $where['act_id'] = $id;
+        $log = M('TimesLog')->where($where)->find();
+        if ($inviter == 1) {
+            if ($invitee == 1) {
+                if (!timesChange($to_uid, $log['amount'], 1, '面对面邀请评价', 'facetoface_comment', $id)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+            if ($invitee == 0) {
+                if (!timesChange($send_uid, $log['amount'], 1, '面对面邀请评价', 'facetoface_comment', $id)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+        if ($inviter == 0) {
+            if ($invitee == 1) {
+                if (!timesChange($send_uid, $log['amount'], 1, '面对面邀请评价', 'facetoface_comment', $id)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+            if ($invitee == 0) {
+                if (!timesChange($to_uid, $log['amount'], 1, '面对面邀请评价', 'facetoface_comment', $id)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
     }
 }

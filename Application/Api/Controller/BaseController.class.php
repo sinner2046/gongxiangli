@@ -46,6 +46,7 @@ class BaseController extends Controller{
         $first_size = ($page - 1) * $page_size;
 
         $this->data['total_page'] = $total_page;
+        $this->data['count'] = $count;
         return M($model)->field($field)->where($where)->limit($first_size, $page_size )->order($order)->select();
     }
 

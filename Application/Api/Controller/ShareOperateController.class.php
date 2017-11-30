@@ -22,6 +22,33 @@ class ShareOperateController extends BaseController{
         }
     }
 
+    //获取详情
+    public function getShareInfo(){
+        $field = 'id, uid, type, img, title, content, comment, liked, follow, finish_date, is_finished, create_time';
+        $data = M('Share')->field($field)->find($this->share_id);
+
+        $info = getUserInfo($data['uid']);
+        $data['nickname'] = $info['nickname'];
+        $data['headimg'] = $info['headimg'];
+        $data['zhiye'] = $info['zhiye'];
+
+        $where['share_id'] = $this->share_id;
+        $data['comment_list'] = M('ShareComment')->field('uid, content, create_time')->where($where)->select();
+        if($data['comment_list']){
+            foreach ($data['comment_list'] as $k=>$v){
+                $info = getUserInfo($v['uid']);
+                $data['comment_list'][$k]['nickname'] = $info['nickname'];
+                $data['comment_list'][$k]['headimg'] = $info['headimg'];
+                $data['comment_list'][$k]['zhiye'] = $info['zhiye'];
+            }
+        }
+        if($data['type'] == 1){
+            $data['file'] = M('ShareFile')->field('type, url')->where($where)->select();
+        }
+
+        $this->ajaxSuccess($data);
+    }
+
     //删除/设为隐私，公开 内容
     public function setShare(){
         $visible = I('visible');
@@ -36,7 +63,7 @@ class ShareOperateController extends BaseController{
         $where['visible'] = array('gt', -1);
         $share = M('Share')->where($where)->find();
         if(!$share){
-            $this->ajaxError('此内容不存在或被删除1');
+            $this->ajaxError('此内容不存在或被删除');
         }
 
         $data['visible'] = $visible;
