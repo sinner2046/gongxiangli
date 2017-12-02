@@ -190,4 +190,136 @@ class UserController extends BaseController{
 
         $this->ajaxSuccess($data);
     }
+
+    //时间银行记录
+    public function getTimesLog($page = 1){
+        $type = I('type', 0, 'int');
+        if(!in_array($type, array(0, 1, -1, 2))){
+            $this->ajaxError('参数错误');
+        }
+        $where['uid'] = $this->uid;
+        if($type != 0){
+            if($type == 2){
+                $where['act'] = 'recharge';
+            }else{
+                $where['type'] = $type;
+            }
+        }
+        $field = 'type, amount, info, create_time, after';
+        $data = $this->pageData($page, 'TimesLog', $where, $field, 'create_time DESC');
+
+        $where = [];
+        $where['uid'] = $this->uid;
+        $where['type'] = 1;
+        $where['create_time'] = array(
+            array('egt', strtotime(date('Y-m-d', NOW_TIME )  . ' 00:00:00')),
+            array('elt', strtotime(date('Y-m-d', NOW_TIME) . ' 23:59:59'))
+        );
+        $this->data['total_in'] = M('TimesLog')->where($where)->sum('amount');
+
+        $where['type'] = -1;
+        $this->data['total_out'] = M('TimesLog')->where($where)->sum('amount');
+
+        $this->ajaxSuccess($data);
+    }
+
+    //换绑手机
+    public function changeMobile(){
+        $mobile = I('mobile');
+        $code = I('code', 0, 'int');
+        if(!checkMobile($mobile)){
+            $this->ajaxError('手机号码格式不正确');
+        }
+        if(empty($code)){
+            $this->ajaxError('验证码不能为空');
+        }
+        if($code < 100000 || $code > 999999){
+            $this->ajaxError('验证码格式不正确');
+        }
+
+        $where['account'] = $mobile;
+        $where['mode'] = 1;
+        $where['type'] = 3;
+        $code_info = M('Code')->where($where)->order('create_time DESC')->find();
+        if(!$code_info){
+            $this->ajaxError('请先发送验证码');
+        }
+        if($code != $code_info['code']){
+            $this->ajaxError('验证码错误');
+        }
+
+        $where = [];
+        $where['mobile'] = $mobile;
+        if(M('User')->where($where)->count()){
+            $this->ajaxError('此手机号码已经注册');
+        }
+
+        $where = [];
+        $where['uid'] = $this->uid;
+        $data['mobile'] = $mobile;
+        $res = M('User')->where($where)->save($data);
+        if(!$res){
+            $this->ajaxError('手机号码更改失败，请稍后再试');
+        }
+        $this->ajaxSuccess('', '手机号码更换成功');
+    }
+
+    //换绑邮箱
+    public function changeEmail(){
+        $email = I('email');
+        $code = I('code', 0, 'int');
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+            $this->ajaxError('邮箱格式不正确');
+        }
+        if(empty($code)){
+            $this->ajaxError('验证码不能为空');
+        }
+        if($code < 100000 || $code > 999999){
+            $this->ajaxError('验证码格式不正确');
+        }
+
+        $where['account'] = $email;
+        $where['mode'] = 2;
+        $where['type'] = 3;
+        $code_info = M('Code')->where($where)->order('create_time DESC')->find();
+        if(!$code_info){
+            $this->ajaxError('请先发送验证码');
+        }
+        if($code != $code_info['code']){
+            $this->ajaxError('验证码错误');
+        }
+
+        $where = [];
+        $where['email'] = $email;
+        if(M('User')->where($where)->count()){
+            $this->ajaxError('此邮箱已经注册');
+        }
+
+        $where = [];
+        $where['uid'] = $this->uid;
+        $data['email'] = $email;
+        $res = M('User')->where($where)->save($data);
+        if(!$res){
+            $this->ajaxError('邮箱更改失败，请稍后再试');
+        }
+        $this->ajaxSuccess('', '邮箱更换成功');
+    }
+
+    //更改密码
+    public function changePassword(){
+        $password = I('password');
+        $new_password = I('new_password');
+        if(empty($password) || empty($new_password)){
+            $this->ajaxError('密码不能为空');
+        }
+
+        $user = D('Admin/User');
+        if(!$user->verifyPassword($this->uid, $password)){
+            $this->ajaxError('用户密码错误');
+        }
+        if(!$user->changePassword($this->uid, $new_password)){
+            $this->ajaxError($user->getError());
+        }
+        $this->ajaxSuccess('','密码修改成功');
+    }
 }

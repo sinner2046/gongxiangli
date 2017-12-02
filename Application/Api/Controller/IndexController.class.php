@@ -131,6 +131,11 @@ class IndexController extends BaseController{
 
         $data = $this->userInfo($other_uid);
 
+        $where = [];
+        $where['uid'] = $this->uid;
+        $where['follow_uid'] = $other_uid;
+        $data['is_follow'] = M('Friend')->where($where)->count();
+
         $visible = M('User')->field('visible')->find($other_uid);
         if($visible['visible'] == 0){
             $data['signature'] = '保密';
@@ -183,9 +188,19 @@ class IndexController extends BaseController{
         $where['uid'] = $this->uid;
         $where['visible']  = array('egt',0);
 
-        $field = 'id, uid, type, img, title, comment, liked, follow, finish_date, is_finished, create_time';
+        $field = 'id, uid, type, img, title, content, comment, liked, follow, finish_date, is_finished, visible, create_time';
         $order = 'create_time DESC';
         $data = $this->pageData($page, 'Share', $where, $field, $order);
+
+        foreach ($data as $k=>$v){
+            $data[$k]['img'] = [];
+            $data[$k]['img'][] = $v['img'];
+            $where = [];
+            $where['share_id'] = $v['id'];
+            $data[$k]['is_liked'] = M('ShareLiked')->where($where)->count();
+
+            $data[$k]['is_follow'] = M('ShareFollow')->where($where)->count();
+        }
         $this->ajaxSuccess($data);
     }
 
@@ -205,9 +220,19 @@ class IndexController extends BaseController{
         $where['uid'] = $other_uid;
         $where['visible']  = array('gt',0);
 
-        $field = 'id, uid, type, img, title, comment, liked, follow, finish_date, is_finished, create_time';
+        $field = 'id, uid, type, img, title, content, comment, liked, follow, finish_date, is_finished, create_time';
         $order = 'create_time DESC';
         $data = $this->pageData($page, 'Share', $where, $field, $order);
+
+        foreach ($data as $k=>$v){
+            $data[$k]['img'] = [];
+            $data[$k]['img'][] = $v['img'];
+            $where = [];
+            $where['share_id'] = $v['id'];
+            $data[$k]['is_liked'] = M('ShareLiked')->where($where)->count();
+
+            $data[$k]['is_follow'] = M('ShareFollow')->where($where)->count();
+        }
         $this->ajaxSuccess($data);
     }
 }

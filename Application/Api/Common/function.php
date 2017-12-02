@@ -4,7 +4,7 @@ function checkMobile($mobile){
     if(strlen($mobile) != 11){
         return false;
     }
-    if(preg_match('/^13[\d]{9}$|^14[5,7]{1}\d{8}$|^15[^4]{1}\d{8}$|^17[0,6,7,8]{1}\d{8}$|^18[\d]{9}$/', $mobile)){
+    if(preg_match('/^13[\d]{9}$|^14[5,7]{1}\d{8}$|^15[^4]{1}\d{8}$|^17[0,5,6,7,8]{1}\d{8}$|^18[\d]{9}$/', $mobile)){
         return true;
     }else{
         return false;

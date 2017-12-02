@@ -37,9 +37,7 @@ class ShareOperateController extends BaseController{
         if($data['comment_list']){
             foreach ($data['comment_list'] as $k=>$v){
                 $info = getUserInfo($v['uid']);
-                $data['comment_list'][$k]['nickname'] = $info['nickname'];
-                $data['comment_list'][$k]['headimg'] = $info['headimg'];
-                $data['comment_list'][$k]['zhiye'] = $info['zhiye'];
+                $data['comment_list'][$k] = array_merge($v, $info);
             }
         }
         if($data['type'] == 1){
@@ -151,7 +149,7 @@ class ShareOperateController extends BaseController{
             $this->ajaxError('收藏失败，请稍后再试');
         }
         $where = [];
-        $where['share_id'] = $this->share_id;
+        $where['id'] = $this->share_id;
         $res = M('Share')->where($where)->setInc('follow');
         if(!$res){
             M('ShareFollow')->delete($id);
@@ -175,7 +173,7 @@ class ShareOperateController extends BaseController{
             $this->ajaxError('取消收藏失败，请稍后再试');
         }
         $where = [];
-        $where['share_id'] = $this->share_id;
+        $where['id'] = $this->share_id;
         $res = M('Share')->where($where)->setDec('follow');
         if(!$res){
             M('ShareFollow')->add($info);
@@ -202,7 +200,7 @@ class ShareOperateController extends BaseController{
             $this->ajaxError('点赞失败，请稍后再试');
         }
         $where = [];
-        $where['share_id'] = $this->share_id;
+        $where['id'] = $this->share_id;
         $res = M('Share')->where($where)->setInc('liked');
         if(!$res){
             M('ShareFollow')->delete($id);
@@ -226,12 +224,45 @@ class ShareOperateController extends BaseController{
             $this->ajaxError('取消点赞失败，请稍后再试');
         }
         $where = [];
-        $where['share_id'] = $this->share_id;
+        $where['id'] = $this->share_id;
         $res = M('Share')->where($where)->setDec('liked');
         if(!$res){
             M('ShareLiked')->add($info);
             $this->ajaxError('取消点赞失败，请稍后再试');
         }
         $this->ajaxSuccess('', '取消点赞成功');
+    }
+
+    //设置目标已完成，未完成
+    public function setFinshed(){
+        $finished = I('finished', 0, 'int');
+        if(!in_array($finished, array(1, -1))){
+            $this->ajaxError('参数错误');
+        }
+
+        $where['id'] = $this->share_id;
+        $where['uid'] = $this->uid;
+        $where['type'] = 3;
+        $where['is_finished'] = 0;
+        $where['visible'] = array('gt', -1);
+        if(!M('Share')->where($where)->count()){
+            $this->ajaxError('没有需要设置的目标');
+        }
+
+        if($finished == 1){
+            $data['is_finished'] = 1;
+            $data['type'] = 4;
+        }
+        if($finished == -1){
+            $data['is_finished'] = -1;
+        }
+        $where = [];
+        $where['id'] = $this->share_id;
+        $res = M('Share')->where($where)->save($data);
+
+        if(!$res){
+            $this->ajaxError('设置失败，请稍后再试');
+        }
+        $this->ajaxSuccess('', '设置成功');
     }
 }

@@ -9,7 +9,7 @@ class UserModel extends Model{
     protected $_validate = array(
         /* 验证手机号码 */
         array('mobile', '11', '手机号长度不正确 ', self::EXISTS_VALIDATE,  'length'),
-        array('mobile', '/^13[\d]{9}$|^14[5,7]{1}\d{8}$|^15[^4]{1}\d{8}$|^17[0,6,7,8]{1}\d{8}$|^18[\d]{9}$/', '手机号格式不正确 ', self::EXISTS_VALIDATE,  'regex'),
+        array('mobile', '/^13[\d]{9}$|^14[5,7]{1}\d{8}$|^15[^4]{1}\d{8}$|^17[0,5,6,7,8]{1}\d{8}$|^18[\d]{9}$/', '手机号格式不正确 ', self::EXISTS_VALIDATE,  'regex'),
         array('mobile', '', '手机号被占用', self::EXISTS_VALIDATE, 'unique'),
         /* 验证邮箱 */
         array('email', 'email', '邮箱格式不正确', self::EXISTS_VALIDATE),
@@ -40,10 +40,21 @@ class UserModel extends Model{
     }
 
     public function verifyPassword($uid, $password){
-        $md5_password = $this->getFieldById($uid, 'password');
+        $md5_password = $this->getFieldByUid($uid, 'password');
         if($this->think_ucenter_md5($password, AUTH_KEY) === $md5_password){
             return true;
         }
         return false;
+    }
+
+    public function changePassword($uid, $password){
+        $data['password'] = $password;
+        $where['uid'] = $uid;
+        if($this->create($data)){
+            $res = $this->where($where)->save();
+            return $res;
+        } else {
+            return false;
+        }
     }
 }

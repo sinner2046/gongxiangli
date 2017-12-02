@@ -161,13 +161,35 @@ class ShareController extends BaseController{
 
         foreach ($data as $k=>$v){
             $info = getUserInfo($v['uid']);
-            $data[$k]['nickname'] = $info['nickname'];
-            $data[$k]['headimg'] = $info['headimg'];
-            $data[$k]['zhiye'] = $info['zhiye'];
+            $data[$k] = array_merge($v, $info);
+
+            $where = [];
+            $where['share_id'] = $v['id'];
+            $where['uid'] = $this->uid;
+            $data[$k]['is_liked'] = M('ShareLiked')->where($where)->count();
+
+            $data[$k]['is_follow'] = M('ShareFollow')->where($where)->count();
         }
 
         $this->ajaxSuccess($data);
     }
 
+    //获取收藏列表
+    public function getFollowShare($page = 1){
+        $where['uid'] = $this->uid;
+        $data = $this->pageData($page, 'ShareFollow', $where, 'share_id', 'create_time DESC');
+
+        foreach ($data as $k=>$v){
+
+            $field = 'uid, type, img, title, content, comment, liked, follow, finish_date, is_finished, create_time';
+            $share_info = M('Share')->field($field)->find($v['share_id']);
+
+            $info = getUserInfo($share_info['uid']);
+
+            $data[$k] = array_merge($v, $info, $share_info);
+        }
+
+        $this->ajaxSuccess($data);
+    }
 
 }

@@ -295,4 +295,29 @@ class FaceToFaceController extends BaseController{
             }
         }
     }
+
+    //面对面评价列表
+    public function facetofaceCommentList($page = 1){
+        $type = I('type', 0, 'int');
+        if(!in_array($type, array(1, 2))){
+            $this->ajaxError('参数错误');
+        }
+
+        if($type == 1){
+            $where['to_uid'] = $this->uid;
+            $field = 'uid, content, goutong, zhuanye, create_time';
+        }
+        if($type == 2){
+            $where['uid'] = $this->uid;
+            $field = 'to_uid AS uid, content, goutong, zhuanye, create_time';
+        }
+
+        $data = $this->pageData($page, 'FacetofaceComment', $where, $field, 'create_time DESC');
+        foreach ($data as $k=>$v){
+            $info = getUserInfo($v['uid']);
+            $data[$k] = array_merge($v, $info);
+        }
+
+        $this->ajaxSuccess($data);
+    }
 }

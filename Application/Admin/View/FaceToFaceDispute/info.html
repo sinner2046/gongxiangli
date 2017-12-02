@@ -3,7 +3,7 @@
 <block name="body">
 	<!-- 标题栏 -->
 	<div class="main-title">
-		<h2>面对面纠纷列表</h2>
+		<h2>面对面纠纷详情</h2>
 	</div>
 
     <!-- 数据列表 -->
@@ -11,15 +11,13 @@
 	<table class="">
     <thead>
         <tr>
-			<th class="">ID</th>
-			<th class="">主题</th>
-			<th class="">见面时间</th>
-			<th class="">见面地点</th>
-			<th class="">邀请人</th>
+			<th class="">角色</th>
+			<th class="">评论人</th>
+			<th class="">评论内容</th>
+			<th class="">邀请人是否到场</th>
+			<th class="">被邀请人是否到场</th>
 			<th class="">被邀请人</th>
-			<th class="">发起时间</th>
-			<th class="">状态</th>
-			<th class="">操作</th>
+			<th class="">评论时间</th>
 		</tr>
     </thead>
     <tbody>
@@ -37,17 +35,15 @@
 				<eq name="vo.status" value="1">已处理</eq>
 				<eq name="vo.status" value="0">未处理</eq>
 			</td>
-			<td><a href="{:U('info?id='.$vo['id'])}">详情</a></td>
+			<td><a href="{:U('info?id='.$vo['uid'])}">详情</a></td>
 		</tr>
 		</volist>
 		<else/>
-		<td colspan="9" class="text-center"> aOh! 暂时还没有内容! </td>
+		<td colspan="7" class="text-center"> aOh! 暂时还没有内容! </td>
 		</notempty>
 	</tbody>
     </table>
 	</div>
-    <div class="page">
-        {$_page}
-    </div>
+
 </block>
 

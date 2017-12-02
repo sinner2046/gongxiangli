@@ -22,57 +22,70 @@ class PublicController extends Controller{
 
 /*    发送验证码
     mode：1 手机；2 邮箱
-    type：1 注册；2 找回密码
+    type：1 注册；2 找回密码  3: 换绑
 */
     public function sendCode(){
-        $mode = I('mode');
-        $type = I('type');
+        $mode = I('mode', 0, 'int');
+        $type = I('type', 0, 'int');
         $account = I('account');
-        if(!in_array($mode, array('1', '2'))){
+        if(!in_array($mode, array(1, 2))){
             $this->ajaxError('参数错误');
         }
-        if(!in_array($type, array('1', '2'))){
+        if(!in_array($type, array(1, 2, 3))){
             $this->ajaxError('参数错误');
         }
-        if($type == '1'){
+        if($type == 1){
             $text = '注册用户';
         }
-        if($type == '2'){
+        if($type == 2){
             $text = '找回密码';
         }
+        if($type == 3){
+            $uid = I('uid', 0, 'int');
+            if ($uid < 1) {
+                $this->ajaxError('请先登录');
+            }
+            $where['uid'] = $uid;
+            $where['status'] = array('gt', 0);
+            if (!M('User')->where($where)->count()) {
+                $this->ajaxError('此用户不存在或被禁用');
+            }
+            $text = '更换绑定信息';
+        }
+
         $code = mt_rand(100000, 999999);
-        if($mode == '1'){
+        if($mode == 1){
             if(!checkMobile($account)){
                 $this->ajaxError('手机号码格式不正确');
             }
             $where['mobile'] = $account;
             $info = M('User')->where($where)->count();
-            if($type == '1'){
+            if($type == 1 || $type == 3){
                 if($info){
-                    $this->ajaxError('此用户已经注册');
+                    $this->ajaxError('此手机号码已经注册');
                 }
             }
-            if($type == '2'){
+            if($type == 2){
                 if(!$info){
-                    $this->ajaxError('此用户尚未注册');
+                    $this->ajaxError('此手机号码尚未注册');
                 }
             }
             $res = sendSms($account, $code);
         }
-        if($mode == '2'){
+        if($mode == 2){
             if(!filter_var($account, FILTER_VALIDATE_EMAIL)) {
                 $this->ajaxError('邮箱格式不正确');
             }
             $where['email'] = $account;
             $info = M('User')->where($where)->count();
-            if($type == '1'){
+            if($type == 1 && $type == 3){
                 if($info){
-                    $this->ajaxError('此用户已经注册');
+                    $this->ajaxError('此邮箱已经注册');
                 }
             }
-            if($type == '2'){
+            if($type == 2){
                 if(!$info){
-                    $this->ajaxError('此用户尚未注册');
+                    $this->ajaxError('此邮箱尚未注册');
                 }
             }
             $res = sendEmail($account, $text, $code);
@@ -97,9 +110,9 @@ class PublicController extends Controller{
     //用户注册
     public function register(){
         $account = I('account');
-        $mode = I('mode');
+        $mode = I('mode', 0, 'int');
         $code = I('code', 0, 'int');
-        if(!in_array($mode, array('1', '2'))){
+        if(!in_array($mode, array(1, 2))){
             $this->ajaxError('参数错误');
         }
         if(empty($code)){
@@ -120,10 +133,10 @@ class PublicController extends Controller{
             $this->ajaxError('验证码错误');
         }
 
-        if($mode == '1'){
+        if($mode == 1){
             $data['mobile'] = $account;
         }
-        if($mode == '2'){
+        if($mode == 2){
 
             $data['email'] = $account;
         }
@@ -164,7 +177,7 @@ class PublicController extends Controller{
         if(checkMobile($account)){
             $where['mobile'] = $account;
         }elseif(filter_var($account, FILTER_VALIDATE_EMAIL)){
-            $where['eamil'] = $account;
+            $where['email'] = $account;
         }else{
             $this->ajaxError('手机号/邮箱 验证失败');
         }
@@ -173,7 +186,8 @@ class PublicController extends Controller{
         if(!is_array($info)){
             $this->ajaxError('用户不存在或被禁用');
         }
-        if(!D('Admin/User')->verifyPassword($info['id'], $password)){
+
+        if(!D('Admin/User')->verifyPassword($info['uid'], $password)){
             $this->ajaxError('用户密码错误');
         }
 
