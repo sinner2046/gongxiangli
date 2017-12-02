@@ -78,11 +78,11 @@ class FaceToFaceController extends BaseController{
 
         if($type == 1){
             $where['uid'] = $this->uid;
-            $field = 'to_uid as uid, theme, datetime, create_time, status';
+            $field = 'to_uid as uid, theme, datetime, create_time, status, inviter AS is_comment';
         }
         if($type == 2){
             $where['to_uid'] = $this->uid;
-            $field = 'uid, theme, datetime, create_time, status';
+            $field = 'uid, theme, datetime, create_time, status, invitee AS is_comment ';
 
             $set_data['is_read'] = 1;
             M('Facetoface')->where($where)->save($set_data);
