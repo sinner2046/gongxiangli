@@ -5,8 +5,7 @@ use Think\Model;
 class CateModel extends Model{
     protected $_validate = array(
         array('name', 'require', '名称不能为空', self::EXISTS_VALIDATE, 'regex', self::MODEL_BOTH),
-        array('name', '', '名称已经存在', self::VALUE_VALIDATE, 'unique', self::MODEL_BOTH),
-        array('name', '1,10', '名称不能超过10个字符', self::VALUE_VALIDATE , 'length', self::MODEL_BOTH),
+        array('name', '1,15', '名称不能超过15个字符', self::VALUE_VALIDATE , 'length', self::MODEL_BOTH),
     );
 
     protected $_auto = array(

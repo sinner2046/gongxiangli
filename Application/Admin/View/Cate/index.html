@@ -40,7 +40,7 @@
                     </form>
                 </dt>
                 <notempty name="list['_']">
-                    <dd>
+                    <dd style="display: none">
                         <volist name="list['_']" id="list_">
                             <dl class="cate-item">
                                 <dt class="cf">
@@ -64,7 +64,7 @@
                                     </form>
                                 </dt>
                                 <notempty name="list_['_']">
-                                    <dd>
+                                    <dd style="display: none">
                                         <volist name="list_['_']" id="list__">
                                             <dl class="cate-item">
                                                 <dt class="cf">
@@ -102,7 +102,7 @@
     <script type="text/javascript">
         (function($){
             /* 分类展开收起 */
-            $(".category dd").prev().find(".fold i").addClass("icon-unfold")
+            $(".category dd").prev().find(".fold i").addClass("icon-fold")
                 .click(function(){
                     var self = $(this);
                     if(self.hasClass("icon-unfold")){

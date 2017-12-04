@@ -88,4 +88,20 @@ class UploadsController extends BaseController{
         }
         $this->ajaxSuccess($data, '图片上传成功');
     }
+
+    //删除图片
+    public function del(){
+        $url = I('url');
+        if(empty($url)){
+            $this->ajaxError('请选择要删除的图片');
+        }
+        if(is_array($url)){
+            foreach ($url as $u){
+                @unlink(substr($u, 1));
+            }
+        }else{
+            @unlink(substr($url, 1));
+        }
+        $this->ajaxSuccess('', '删除成功');
+    }
 }
