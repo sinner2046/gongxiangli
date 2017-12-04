@@ -155,6 +155,7 @@ class FaceToFaceController extends BaseController{
         $content = I('content');
         $goutong = I('goutong', 0, 'int');
         $zhuanye = I('zhuanye', 0, 'int');
+        $img = I('img');
 
         if(empty($id)){
             $this->ajaxError('请先选择邀请');
@@ -214,6 +215,15 @@ class FaceToFaceController extends BaseController{
         $add_id = M('FacetofaceComment')->add($data);
         if(!$add_id){
             $this->ajaxError('评价失败，请稍后再试');
+        }
+
+        if($img){
+            foreach ($img as $v){
+                $data = [];
+                $data['facetoface_comment_id'] = $add_id;
+                $data['url'] = $v;
+                M('FacetofaceCommentImg')->add($data);
+            }
         }
 
         //判断对方是否评价
@@ -316,6 +326,10 @@ class FaceToFaceController extends BaseController{
         foreach ($data as $k=>$v){
             $info = getUserInfo($v['uid']);
             $data[$k] = array_merge($v, $info);
+
+            $where = [];
+            $where['facetoface_comment_id'] = $v['id'];
+            $data[$k]['img'] = M('FacetofaceCommentImg')->where($where)->getField('url');
         }
 
         $this->ajaxSuccess($data);
