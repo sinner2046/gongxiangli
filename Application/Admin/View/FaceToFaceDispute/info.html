@@ -16,7 +16,7 @@
 			<th class="">评论内容</th>
 			<th class="">邀请人是否到场</th>
 			<th class="">被邀请人是否到场</th>
-			<th class="">被邀请人</th>
+
 			<th class="">评论时间</th>
 		</tr>
     </thead>
@@ -24,18 +24,18 @@
 		<notempty name="_list">
 		<volist name="_list" id="vo">
 		<tr>
-			<td>{$vo.id} </td>
-			<td>{$vo.theme}</td>
-			<td>{$vo.datetime|time_format} </td>
-			<td>{$vo.address}</td>
-			<td>{$vo.inviter_nickname}</td>
-			<td>{$vo.invitee_nickname}</td>
-			<td>{$vo.create_time|time_format}</td>
+			<td>{$vo.role} </td>
+			<td>{$vo.nickname}</td>
+			<td>{$vo.content} </td>
 			<td>
-				<eq name="vo.status" value="1">已处理</eq>
-				<eq name="vo.status" value="0">未处理</eq>
+				<eq name="vo.inviter" value="0">否</eq>
+				<eq name="vo.inviter" value="1">是</eq>
 			</td>
-			<td><a href="{:U('info?id='.$vo['uid'])}">详情</a></td>
+			<td>
+				<eq name="vo.invitee" value="0">否</eq>
+				<eq name="vo.invitee" value="1">是</eq>
+			</td>
+			<td>{$vo.create_time|time_format}</td>
 		</tr>
 		</volist>
 		<else/>
@@ -45,5 +45,40 @@
     </table>
 	</div>
 
+	<div class="main-title">
+		<h2>处理结果：</h2>
+	</div>
+
+	<form action="{:U('handle')}" method="post" class="form-horizontal">
+		<div class="form-item">
+			<label class="item-label">邀请人是否到场：</label>
+			<div class="controls">
+				<label class="inline radio"><input type="radio" name="inviter" value="1" <eq name="info.inviter" value="1">checked</eq>> 是 </label>
+				<label class="inline radio"><input type="radio" name="inviter" value="0" <eq name="info.inviter" value="0">checked</eq>> 否 </label>
+			</div>
+		</div>
+		<div class="form-item">
+			<label class="item-label">被邀请人是否到场：</label>
+			<div class="controls">
+				<label class="inline radio"><input type="radio" name="invitee" value="1" <eq name="info.invitee" value="1">checked</eq> > 是 </label>
+				<label class="inline radio"><input type="radio" name="invitee" value="0" <eq name="info.invitee" value="0">checked</eq>> 否 </label>
+			</div>
+		</div>
+
+		<div class="form-item">
+			<input type="hidden" name="id" value="{$info.id}">
+			<eq name="info.status" value="0">
+				<button class="btn submit-btn ajax-post" id="submit" type="submit" target-form="form-horizontal">确 定</button>
+			</eq>
+			<button class="btn btn-return" onclick="javascript:history.back(-1);return false;">返 回</button>
+		</div>
+	</form>
+
+</block>
+
+<block name="script">
+	<script tyep="text/javascript">
+        highlight_subnav("{:U('index')}");
+	</script>
 </block>
 
