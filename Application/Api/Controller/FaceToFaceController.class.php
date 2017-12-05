@@ -118,6 +118,8 @@ class FaceToFaceController extends BaseController{
             $this->ajaxError('没有要操作的邀请');
         }
 
+        $where = [];
+        $where['id'] = $id;
         $data['status'] = $status;
         if(!M('Facetoface')->where($where)->save($data)){
             $this->ajaxError('操作失败，请稍后再试');
