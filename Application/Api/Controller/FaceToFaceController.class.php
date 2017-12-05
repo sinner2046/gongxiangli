@@ -329,7 +329,7 @@ class FaceToFaceController extends BaseController{
 
             $where = [];
             $where['facetoface_comment_id'] = $v['id'];
-            $data[$k]['img'] = M('FacetofaceCommentImg')->where($where)->getField('url', 1);
+            $data[$k]['img'] = M('FacetofaceCommentImg')->where($where)->getField('url', true);
         }
 
         $this->ajaxSuccess($data);
