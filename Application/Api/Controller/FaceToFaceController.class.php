@@ -315,11 +315,11 @@ class FaceToFaceController extends BaseController{
 
         if($type == 1){
             $where['to_uid'] = $this->uid;
-            $field = 'uid, content, goutong, zhuanye, create_time';
+            $field = 'id, uid, content, goutong, zhuanye, create_time';
         }
         if($type == 2){
             $where['uid'] = $this->uid;
-            $field = 'to_uid AS uid, content, goutong, zhuanye, create_time';
+            $field = 'id, to_uid AS uid, content, goutong, zhuanye, create_time';
         }
 
         $data = $this->pageData($page, 'FacetofaceComment', $where, $field, 'create_time DESC');

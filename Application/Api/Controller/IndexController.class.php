@@ -78,6 +78,10 @@ class IndexController extends BaseController{
         $info = $this->userInfo($this->uid);
         $data = array_merge($data, $info);
 
+        $where = [];
+        $where['uid'] = $this->uid;
+        $data['zhiye_id'] = M('User')->where($where)->getField('zhiye');
+
         $this->ajaxSuccess($data);
     }
 
